@@ -1,0 +1,203 @@
+body, .admin-body {
+    background-color: #f5f3ed;
+    color: #383631;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+    margin: 0; 
+    padding: 20px;
+    -webkit-font-smoothing: antialiased;
+}
+
+[x-cloak] { 
+    display: none !important; 
+}
+
+.admin-container {
+    max-width: 900px; 
+    margin: 0 auto;
+    display: flex; 
+    flex-direction: column; 
+    gap: 24px;
+}
+
+.admin-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background: #fcfbfa; 
+    padding: 20px 24px; 
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(56, 54, 49, 0.04);
+}
+
+.brand-title { 
+    margin: 0; 
+    font-size: 1.6rem; 
+    color: #10b981; 
+    font-weight: 800; 
+}
+
+.brand-subtitle { 
+    margin: 4px 0 0 0; 
+    font-size: 0.9rem; 
+    color: #757168; 
+}
+
+.admin-card {
+    background: #fcfbfa; 
+    padding: 24px; 
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(56, 54, 49, 0.04);
+}
+
+.card-title {
+    margin-top: 0; 
+    font-size: 1.25rem; 
+    color: #383631; 
+    font-weight: 700;
+    border-bottom: 2px solid #ebe8df; 
+    padding-bottom: 12px; 
+    margin-bottom: 16px;
+}
+
+/* Form Styles */
+.admin-form { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 14px; 
+}
+
+.form-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 14px; 
+}
+
+.admin-form input, .admin-form textarea, .admin-form select {
+    width: 100%; 
+    padding: 12px 14px; 
+    border: 1px solid #e3dfd3;
+    border-radius: 8px; 
+    font-family: inherit; 
+    font-size: 0.95rem;
+    box-sizing: border-box; 
+    outline: none; 
+    background: #ebe8df; 
+    color: #383631;
+}
+
+.admin-form input:focus, .admin-form textarea:focus { 
+    border-color: #10b981; 
+    background: #fcfbfa; 
+}
+
+/* Checkbox Styles for Multiple Genres */
+.genre-checkbox-group {
+    background: #ebe8df;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #e3dfd3;
+}
+
+.genre-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #57544b;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.checkbox-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.checkbox-item {
+    font-size: 0.9rem;
+    color: #383631;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fcfbfa;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e3dfd3;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    font-weight: 700; 
+    cursor: pointer;
+    border: none; 
+    font-size: 0.95rem; 
+    text-decoration: none; 
+    display: inline-block;
+}
+
+.btn-primary { 
+    background: #10b981; 
+    color: white; 
+    transition: 0.2s; 
+}
+
+.btn-primary:hover { 
+    background: #059669; 
+}
+
+.btn-outline { 
+    background: transparent; 
+    border: 1px solid #c7c2b5; 
+    color: #383631; 
+}
+
+.btn-danger { 
+    background: #ef4444; 
+    color: white; 
+    padding: 6px 14px; 
+    font-size: 0.85rem; 
+    border-radius: 6px; 
+}
+
+.btn-danger:hover { 
+    background: #dc2626; 
+}
+
+/* Table */
+.table-wrapper { 
+    overflow-x: auto; 
+}
+
+.admin-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    min-width: 600px; 
+}
+
+.admin-table th { 
+    background: #ebe8df; 
+    font-weight: 700; 
+    color: #57544b; 
+}
+
+.admin-table th, .admin-table td { 
+    padding: 14px 16px; 
+    text-align: left; 
+    border-bottom: 1px solid #e3dfd3; 
+}
+
+.table-img { 
+    width: 45px; 
+    height: 60px; 
+    object-fit: cover; 
+    border-radius: 6px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+}

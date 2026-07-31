@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangaPick - Premium Manga Tracker</title>
+    <meta name="referrer" content="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/home.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="js/home.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+
+    <div class="app-container" x-data="homeApp()" x-cloak>
+        
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="user-profile">
+                <div>
+                    <h1 class="brand-logo">MangaPick</h1>
+                    <p class="user-email" x-text="currentUser ? currentUser.email : 'ค้นพบและบันทึกมังงะที่คุณชื่นชอบ'"></p>
+                </div>
+                <!-- มุมขวาบน: ปุ่มเข้าสู่ระบบแบบชัดเจน -->
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <template x-if="isAdmin">
+                        <a href="admin.html" class="badge-admin">Admin</a>
+                    </template>
+                    <template x-if="currentUser">
+                        <button @click="logout()" class="btn-logout">ออกจากระบบ</button>
+                    </template>
+                    <template x-if="!currentUser">
+                        <a href="auth.html" class="btn-login-header">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>เข้าสู่ระบบ</span>
+                        </a>
+                    </template>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" x-model="searchQuery" placeholder="ค้นชื่อมังงะ หรือผู้แต่ง..." class="search-input">
+            </div>
+
+            <!-- หมวดหมู่แบบ Dynamic -->
+            <div class="genre-scroll-wrapper">
+                <div class="genre-list">
+                    <button 
+                        class="genre-chip" 
+                        :class="{ 'active': selectedGenre === 'All' }"
+                        @click="selectedGenre = 'All'">
+                        All
+                    </button>
+
+                    <template x-for="genre in availableGenres" :key="genre">
+                        <button 
+                            class="genre-chip" 
+                            :class="{ 'active': selectedGenre === genre }"
+                            @click="selectedGenre = genre"
+                            x-text="genre">
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content (2 Columns Grid) -->
+        <main class="manga-grid">
+            <template x-for="manga in filteredMangas" :key="manga.docId">
+                <div class="manga-card" @click="openModal(manga)" style="cursor: pointer;">
+                    <div class="manga-cover-wrapper">
+                        <img 
+                            :src="manga.cover" 
+                            :alt="manga.title" 
+                            class="manga-img"
+                            onerror="this.onerror=null; this.src='https://images.weserv.nl/?url=https://i.pinimg.com/736x/8f/3e/68/8f3e68f3074360e206b12a83e0c031d2.jpg';"
+                        />
+                        <button 
+                            class="fav-btn" 
+                            @click.stop="toggleFavorite(manga)"
+                            :class="{ 'is-fav': isFavorite(manga.docId) }">
+                            <i :class="isFavorite(manga.docId) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                        </button>
+                    </div>
+                    <div class="manga-info">
+                        <h3 class="manga-title" x-text="manga.title"></h3>
+                        <p class="manga-author" x-text="manga.author"></p>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="filteredMangas.length === 0">
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #888;">
+                    <p>😢 ไม่พบการ์ตูนที่ค้นหา</p>
+                </div>
+            </template>
+        </main>
+
+        <!-- Navigation Bar -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="favorites.html" class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>My Library</span>
+            </a>
+        </nav>
+
+        <!-- Modal แสดงรายละเอียด/เรื่องย่อ -->
+        <div class="modal-overlay" x-show="showModal" @click.self="closeModal()" x-transition>
+            <div class="modal-content" x-show="showModal" x-transition>
+                <button class="modal-close-btn" @click="closeModal()">&times;</button>
+                <template x-if="selectedManga">
+                    <div>
+                        <div class="modal-cover-box">
+                            <img :src="selectedManga.cover" :alt="selectedManga.title" class="modal-cover-img">
+                        </div>
+                        <h2 class="modal-title" x-text="selectedManga.title"></h2>
+                        <p class="modal-author" x-text="'ผู้แต่ง: ' + selectedManga.author"></p>
+                        
+                        <div class="modal-genres">
+                            <template x-for="g in selectedManga.genres" :key="g">
+                                <span class="modal-genre-tag" x-text="g"></span>
+                            </template>
+                        </div>
+
+                        <div class="modal-synopsis">
+                            <h4>เรื่องย่อ</h4>
+                            <p x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
