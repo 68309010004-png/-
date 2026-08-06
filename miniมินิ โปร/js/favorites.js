@@ -56,7 +56,8 @@ function favoritesApp() {
                         title: favData.title || fullMangaData.title || 'ไม่มีชื่อ',
                         cover: favData.cover || fullMangaData.cover || 'https://via.placeholder.com/150',
                         author: fullMangaData.author || 'ไม่ระบุ',
-                        synopsis: fullMangaData.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'
+                        synopsis: fullMangaData.synopsis || 'ไม่มีข้อมูลเรื่องย่อ',
+                        buyUrl: fullMangaData.buyUrl || ''
                     });
                 }
 

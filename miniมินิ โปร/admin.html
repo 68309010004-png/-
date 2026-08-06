@@ -4,110 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - MangaPick</title>
-    <meta name="referrer" content="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/admin.css">
     
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <script src="js/admin.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="admin-body">
-    
+<body>
+
     <div class="admin-container" x-data="adminApp()" x-cloak>
-        
         <header class="admin-header">
             <div>
-                <h1 class="brand-title">Admin Panel</h1>
-                <p class="brand-subtitle">จัดการเนื้อหา MangaPick</p>
+                <h1>Admin Dashboard</h1>
+                <p>จัดการมังงะและรายการในระบบ</p>
             </div>
-            <div style="display: flex; gap: 8px;">
-                <a href="index.html" class="btn btn-outline">🏠 กลับหน้าแรก</a>
-                <button @click="logout()" class="btn btn-danger">ออกจากระบบ</button>
-            </div>
+            <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> กลับหน้าหลัก</a>
         </header>
 
-        <div class="admin-card">
-            <h2 class="card-title" x-text="editingMangaId ? '✏️ แก้ไขข้อมูลมังงะ' : '➕ เพิ่มมังงะเรื่องใหม่'"></h2>
-            
-            <form @submit.prevent="saveManga" class="admin-form">
-                <div class="form-row">
-                    <input type="text" x-model="newManga.title" placeholder="ชื่อเรื่อง (จำเป็น)" required>
-                    <input type="text" x-model="newManga.author" placeholder="ชื่อผู้แต่ง (จำเป็น)" required>
-                </div>
+        <main class="admin-content">
+            <!-- Form เพิ่ม / แก้ไข มังงะ -->
+            <section class="card-box">
+                <h2 class="card-title" x-text="isEdit ? 'แก้ไขมังงะ' : 'เพิ่มมังงะใหม่'"></h2>
                 
-                <input type="url" x-model="newManga.cover" placeholder="URL รูปหน้าปก (เช่น https://...)" required>
-                
-                <textarea x-model="newManga.synopsis" placeholder="เรื่องย่อ..." rows="3"></textarea>
-                
-                <!-- เปลี่ยนเป็น Checkbox เลือกหลายหมวดหมู่ -->
-                <div class="genre-checkbox-group">
-                    <label class="genre-title">🏷️ เลือกหมวดหมู่ (เลือกได้หลายแท็ก):</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="Action" x-model="newManga.genres"> Action
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="Romance" x-model="newManga.genres"> Romance
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="Fantasy" x-model="newManga.genres"> Fantasy
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="Comedy" x-model="newManga.genres"> Comedy
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="Drama" x-model="newManga.genres"> Drama
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="Sci-Fi" x-model="newManga.genres"> Sci-Fi
-                        </label>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 8px;">
-                    <button type="submit" class="btn btn-primary" x-text="editingMangaId ? '💾 อัปเดตข้อมูล' : '➕ บันทึกข้อมูลลงฐานข้อมูล'"></button>
-                    <button type="button" class="btn btn-outline" x-show="editingMangaId" @click="cancelEdit()">❌ ยกเลิกแก้ไข</button>
-                </div>
-            </form>
-        </div>
-
-        <div class="admin-card">
-            <h2 class="card-title">📚 รายการมังงะทั้งหมด (<span x-text="mangas.length"></span>)</h2>
-            <div class="table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ปก</th>
-                            <th>ชื่อเรื่อง</th>
-                            <th>ผู้แต่ง</th>
-                            <th>หมวดหมู่</th>
-                            <th>จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="manga in mangas" :key="manga.docId">
-                            <tr>
-                                <td><img :src="manga.cover" class="table-img"></td>
-                                <td x-text="manga.title"></td>
-                                <td x-text="manga.author"></td>
-                                <td x-text="manga.genres && manga.genres.length > 0 ? manga.genres.join(', ') : '-'"></td>
-                                <td>
-                                    <div style="display: flex; gap: 6px;">
-                                        <button @click="editManga(manga)" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; background-color: #3b82f6;">✏️ แก้ไข</button>
-                                        <button @click="deleteManga(manga.docId, manga.title)" class="btn btn-danger">🗑 ลบ</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
+                <form @submit.prevent="saveManga">
+            <div class="form-group">
+                <label>ชื่อเรื่อง (Title)</label>
+                <input type="text" x-model="form.title" placeholder="เช่น One Piece" required class="form-control">
             </div>
-        </div>
-        
+            <div class="form-group-row">
+                <div class="form-group">
+                    <label>ผู้แต่ง (Author)</label>
+                    <input type="text" x-model="form.author" placeholder="เช่น Eiichiro Oda" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>หมวดหมู่ (Category)</label>
+                    <select x-model="form.category" required class="form-control">
+                        <option value="Action">Action</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Comedy">Comedy</option>
+                    </select>
+                </div>
+            </div>
+            <!-- ช่องกรอกลิงก์ซื้อ -->
+            <div class="form-group">
+                <label>ลิงก์เว็บซื้อเล่ม/E-Book (Buy URL)</label>
+                <input type="url" x-model="form.buyUrl" placeholder="https://www.mebmarket.com/..." class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>URL รูปปก (Cover Image URL)</label>
+                <input type="url" x-model="form.cover" placeholder="https://..." required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>เรื่องย่อ (Synopsis)</label>
+                <textarea x-model="form.synopsis" rows="4" placeholder="กรอกเรื่องย่อ..." class="form-control"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" x-text="isEdit ? 'อัปเดตข้อมูล' : 'บันทึกมังงะ'"></button>
+                <button type="button" class="btn-secondary" x-show="isEdit" @click="resetForm()">ยกเลิก</button>
+            </div>
+        </form>
+            </section>
+
+            <!-- รายการมังงะที่มีในระบบ -->
+            <section class="card-box" style="margin-top: 24px;">
+                <h2 class="card-title">รายการมังงะทั้งหมด (<span x-text="mangas.length"></span>)</h2>
+                
+                <div class="manga-table-wrapper">
+                    <table class="manga-table">
+                        <thead>
+                            <tr>
+                                <th>รูปปก</th>
+                                <th>ชื่อเรื่อง</th>
+                                <th>ผู้แต่ง</th>
+                                <th>หมวดหมู่</th>
+                                <th>ลิงก์ซื้อ</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="manga in mangas" :key="manga.id">
+                                <tr>
+                                    <td><img :src="manga.cover" class="table-img"></td>
+                                    <td x-text="manga.title" style="font-weight: 600;"></td>
+                                    <td x-text="manga.author"></td>
+                                    <td><span class="badge" x-text="manga.category"></span></td>
+                                    <td>
+                                        <template x-if="manga.buyUrl">
+                                            <a :href="manga.buyUrl" target="_blank" class="link-buy"><i class="fas fa-external-link-alt"></i> ดูลิงก์</a>
+                                        </template>
+                                        <template x-if="!manga.buyUrl">
+                                            <span style="color: #ccc;">-</span>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <button class="btn-icon edit" @click="editManga(manga)"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-icon delete" @click="deleteManga(manga.id)"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
+
 </body>
 </html>

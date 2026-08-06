@@ -23,59 +23,55 @@
         
         <!-- Header Section -->
         <header class="app-header">
-            <div class="user-profile">
-                <div>
-                    <h1 class="brand-logo">MangaPick</h1>
-                    <p class="user-email" x-text="currentUser ? currentUser.email : 'ค้นพบและบันทึกมังงะที่คุณชื่นชอบ'"></p>
-                </div>
-                <!-- มุมขวาบน: ปุ่มเข้าสู่ระบบแบบชัดเจน -->
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <template x-if="isAdmin">
-                        <a href="admin.html" class="badge-admin">Admin</a>
-                    </template>
-                    <template x-if="currentUser">
-                        <button @click="logout()" class="btn-logout">ออกจากระบบ</button>
-                    </template>
-                    <template x-if="!currentUser">
-                        <a href="auth.html" class="btn-login-header">
-                            <i class="fas fa-sign-in-alt"></i>
-                            <span>เข้าสู่ระบบ</span>
-                        </a>
-                    </template>
+            <div class="header-top">
+                <h1 class="brand-logo">MangaPick</h1>
+                <div class="user-profile">
+                    <a href="admin.html" class="btn-admin-link"><i class="fas fa-cog"></i> Admin</a>
+                    <button @click="logout()" class="logout-btn">ออกจากระบบ</button>
                 </div>
             </div>
+            <p class="user-email" x-text="currentUser ? currentUser.email : 'กำลังโหลด...'"></p>
 
+            <!-- Search Bar -->
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" x-model="searchQuery" placeholder="ค้นชื่อมังงะ หรือผู้แต่ง..." class="search-input">
+                <input 
+                    type="text" 
+                    placeholder="ค้นหาชื่อเรื่องหรือผู้แต่ง..." 
+                    x-model="searchQuery" 
+                    class="search-input"
+                >
             </div>
 
-            <!-- หมวดหมู่แบบ Dynamic -->
-            <div class="genre-scroll-wrapper">
-                <div class="genre-list">
-                    <button 
-                        class="genre-chip" 
-                        :class="{ 'active': selectedGenre === 'All' }"
-                        @click="selectedGenre = 'All'">
-                        All
-                    </button>
-
-                    <template x-for="genre in availableGenres" :key="genre">
-                        <button 
-                            class="genre-chip" 
-                            :class="{ 'active': selectedGenre === genre }"
-                            @click="selectedGenre = genre"
-                            x-text="genre">
-                        </button>
-                    </template>
-                </div>
+            <!-- Filter Pills -->
+            <div class="filter-scroll">
+                <button 
+                    class="filter-pill" 
+                    :class="{ 'active': selectedCategory === 'All' }"
+                    @click="selectedCategory = 'All'">All</button>
+                <button 
+                    class="filter-pill" 
+                    :class="{ 'active': selectedCategory === 'Action' }"
+                    @click="selectedCategory = 'Action'">Action</button>
+                <button 
+                    class="filter-pill" 
+                    :class="{ 'active': selectedCategory === 'Fantasy' }"
+                    @click="selectedCategory = 'Fantasy'">Fantasy</button>
+                <button 
+                    class="filter-pill" 
+                    :class="{ 'active': selectedCategory === 'Sci-Fi' }"
+                    @click="selectedCategory = 'Sci-Fi'">Sci-Fi</button>
+                <button 
+                    class="filter-pill" 
+                    :class="{ 'active': selectedCategory === 'Comedy' }"
+                    @click="selectedCategory = 'Comedy'">Comedy</button>
             </div>
         </header>
 
-        <!-- Main Content (2 Columns Grid) -->
+        <!-- Main Content (Manga Grid) -->
         <main class="manga-grid">
-            <template x-for="manga in filteredMangas" :key="manga.docId">
-                <div class="manga-card" @click="openModal(manga)" style="cursor: pointer;">
+            <template x-for="manga in filteredMangas" :key="manga.id">
+                <div class="manga-card" @click="openModal(manga)">
                     <div class="manga-cover-wrapper">
                         <img 
                             :src="manga.cover" 
@@ -85,9 +81,9 @@
                         />
                         <button 
                             class="fav-btn" 
-                            @click.stop="toggleFavorite(manga)"
-                            :class="{ 'is-fav': isFavorite(manga.docId) }">
-                            <i :class="isFavorite(manga.docId) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                            :class="{ 'is-fav': isFavorite(manga.id) }" 
+                            @click.stop="toggleFavorite(manga)">
+                            <i class="fas fa-heart"></i>
                         </button>
                     </div>
                     <div class="manga-info">
@@ -97,9 +93,11 @@
                 </div>
             </template>
 
-            <template x-if="filteredMangas.length === 0">
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #888;">
-                    <p>😢 ไม่พบการ์ตูนที่ค้นหา</p>
+            <!-- แสดงเมื่อค้นหาไม่พบ -->
+            <template x-if="filteredMangas.length === 0 && !loading">
+                <div class="empty-state">
+                    <i class="fas fa-search empty-icon"></i>
+                    <p class="empty-title">ไม่พบมังงะที่คุณค้นหา</p>
                 </div>
             </template>
         </main>
@@ -116,7 +114,7 @@
             </a>
         </nav>
 
-        <!-- Modal แสดงรายละเอียด/เรื่องย่อ -->
+        <!-- Modal เรื่องย่อ + ปุ่มสั่งซื้อเล่มแท้ -->
         <div class="modal-overlay" x-show="showModal" @click.self="closeModal()" x-transition>
             <div class="modal-content" x-show="showModal" x-transition>
                 <button class="modal-close-btn" @click="closeModal()">&times;</button>
@@ -126,18 +124,21 @@
                             <img :src="selectedManga.cover" :alt="selectedManga.title" class="modal-cover-img">
                         </div>
                         <h2 class="modal-title" x-text="selectedManga.title"></h2>
-                        <p class="modal-author" x-text="'ผู้แต่ง: ' + selectedManga.author"></p>
+                        <p class="modal-author" x-text="'ผู้แต่ง: ' + (selectedManga.author || 'ไม่ระบุ')"></p>
                         
-                        <div class="modal-genres">
-                            <template x-for="g in selectedManga.genres" :key="g">
-                                <span class="modal-genre-tag" x-text="g"></span>
-                            </template>
-                        </div>
-
                         <div class="modal-synopsis">
                             <h4>เรื่องย่อ</h4>
                             <p x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></p>
                         </div>
+
+                        <!-- ปุ่มวาร์ปไปซื้อเล่มลิขสิทธิ์ -->
+                        <template x-if="selectedManga.buyUrl">
+                            <a :href="selectedManga.buyUrl" target="_blank" rel="noopener" class="btn-buy-manga">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>สั่งซื้อเล่มลิขสิทธิ์ / E-Book</span>
+                                <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                            </a>
+                        </template>
                     </div>
                 </template>
             </div>

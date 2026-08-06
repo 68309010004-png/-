@@ -27,7 +27,7 @@
             <p class="user-email">คลังเก็บมังงะส่วนตัวของคุณ</p>
         </header>
 
-        <!-- Main Content (2 Columns Grid) -->
+        <!-- Main Content -->
         <main class="manga-grid">
             <template x-for="manga in favoriteMangas" :key="manga.docId">
                 <div class="manga-card" @click="openModal(manga)">
@@ -38,7 +38,6 @@
                             class="manga-img"
                             onerror="this.onerror=null; this.src='https://images.weserv.nl/?url=https://i.pinimg.com/736x/8f/3e/68/8f3e68f3074360e206b12a83e0c031d2.jpg';"
                         />
-                        <!-- ปุ่มลบออกจากรายการโปรด -->
                         <button 
                             class="fav-btn is-fav" 
                             @click.stop="removeFavorite(manga.docId)">
@@ -61,13 +60,6 @@
                     <a href="index.html" class="btn-go-home">ไปเลือกมังงะ</a>
                 </div>
             </template>
-
-            <!-- แสดงขณะกำลังโหลด -->
-            <template x-if="loading">
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #888;">
-                    <p>⏳ กำลังโหลดรายการโปรด...</p>
-                </div>
-            </template>
         </main>
 
         <!-- Navigation Bar -->
@@ -82,7 +74,7 @@
             </a>
         </nav>
 
-        <!-- Modal แสดงรายละเอียดเรื่องย่อ (แก้ไข Syntax แล้ว) -->
+        <!-- Modal เรื่องย่อ + ลิงก์ซื้อ -->
         <div class="modal-overlay" x-show="showModal" @click.self="closeModal()" x-transition>
             <div class="modal-content" x-show="showModal" x-transition>
                 <button class="modal-close-btn" @click="closeModal()">&times;</button>
@@ -98,6 +90,15 @@
                             <h4>เรื่องย่อ</h4>
                             <p x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></p>
                         </div>
+
+                        <!-- ปุ่มสั่งซื้อเล่มลิขสิทธิ์ -->
+                        <template x-if="selectedManga.buyUrl">
+                            <a :href="selectedManga.buyUrl" target="_blank" rel="noopener" class="btn-buy-manga">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>สั่งซื้อเล่มลิขสิทธิ์ / E-Book</span>
+                                <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                            </a>
+                        </template>
                     </div>
                 </template>
             </div>

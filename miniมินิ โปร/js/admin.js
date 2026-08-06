@@ -14,102 +14,116 @@ const db = firebase.firestore();
 function adminApp() {
     return {
         mangas: [],
-        newManga: { title: '', author: '', cover: '', synopsis: '', genres: [] },
-        editingMangaId: null,
+        isEdit: false,
+        editId: null,
+        form: {
+            title: '',
+            author: '',
+            category: 'Action',
+            buyUrl: '',
+            cover: '',
+            synopsis: ''
+        },
 
         init() {
             auth.onAuthStateChanged(user => {
-                if (user) {
-                    db.collection("users").doc(user.uid).get().then(doc => {
-                        if (!doc.exists || doc.data().role !== 'admin') {
-                            alert("⛔ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!");
-                            window.location.href = 'index.html';
-                        } else {
-                            this.fetchMangas(); 
-                        }
-                    });
+                if (!user) {
+                    alert("กรุณาเข้าสู่ระบบในฐานะ Admin");
+                    window.location.href = 'auth.html';
                 } else {
-                    window.location.href = 'auth.html'; 
+                    this.fetchMangas();
                 }
-            });
-        },
-
-        logout() {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html'; 
             });
         },
 
         fetchMangas() {
             db.collection("mangas").onSnapshot(snapshot => {
-                this.mangas = [];
-                snapshot.forEach(doc => {
+                this.mangas = snapshot.docs.map(doc => {
                     const data = doc.data();
-                    this.mangas.push({
-                        docId: doc.id,
-                        title: data.title || 'ไม่มีชื่อ',
-                        author: data.author || 'ไม่ระบุ',
-                        cover: data.cover || data.image || 'https://via.placeholder.com/150',
-                        synopsis: data.synopsis || '',
-                        genres: data.genres || []
-                    });
+                    
+                    // ป้องกันปัญหา Array ชน String แปลงทุกอย่างเป็น String ปลอดภัย
+                    let cat = data.category;
+                    if (Array.isArray(cat)) cat = cat[0] || 'Action';
+
+                    return {
+                        id: doc.id,
+                        title: String(data.title || ''),
+                        author: String(data.author || ''),
+                        category: String(cat || 'Action'),
+                        buyUrl: String(data.buyUrl || ''),
+                        cover: String(data.cover || ''),
+                        synopsis: String(data.synopsis || '')
+                    };
                 });
             });
         },
 
         saveManga() {
-            if (!this.newManga.title || !this.newManga.cover) {
-                return alert("กรุณากรอกชื่อเรื่องและรูปลิงก์หน้าปกให้ครบจ้า!");
+            // ดึงค่าจากฟอร์มตรงๆ เพื่อข้ามบัค Alpine.js
+            const data = {
+                title: String(this.form.title || '').trim(),
+                author: String(this.form.author || '').trim(),
+                category: String(this.form.category || 'Action').trim(),
+                buyUrl: String(this.form.buyUrl || '').trim(),
+                cover: String(this.form.cover || '').trim(),
+                synopsis: String(this.form.synopsis || '').trim()
+            };
+
+            if (!data.title || !data.cover) {
+                alert("กรุณากรอกชื่อเรื่องและ URL รูปปกให้ครบถ้วน");
+                return;
             }
 
-            const mangaData = {
-                title: this.newManga.title,
-                author: this.newManga.author || 'ไม่ระบุ',
-                cover: this.newManga.cover,
-                synopsis: this.newManga.synopsis || 'ไม่มีเรื่องย่อ',
-                genres: this.newManga.genres || []
-            };
-            
-            if (this.editingMangaId) {
-                db.collection("mangas").doc(this.editingMangaId).update(mangaData)
-                    .then(() => {
-                        alert("✅ อัปเดตข้อมูลมังงะสำเร็จแล้ว!");
-                        this.cancelEdit();
-                    }).catch(err => alert("เกิดข้อผิดพลาดในการอัปเดต: " + err));
+            if (this.isEdit && this.editId) {
+                db.collection("mangas").doc(this.editId).set(data, { merge: true }).then(() => {
+                    alert("อัปเดตข้อมูลมังงะสำเร็จ!");
+                    this.resetForm();
+                }).catch(err => {
+                    alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
+                });
             } else {
-                mangaData.id = Date.now();
-                db.collection("mangas").add(mangaData)
-                    .then(() => {
-                        alert("✅ เพิ่มมังงะเรื่องใหม่สำเร็จแล้วแกร๊!");
-                        this.cancelEdit();
-                    }).catch(err => alert("เกิดข้อผิดพลาดในการเพิ่ม: " + err));
+                db.collection("mangas").add(data).then(() => {
+                    alert("เพิ่มมังงะเรียบร้อย!");
+                    this.resetForm();
+                }).catch(err => {
+                    alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
+                });
             }
         },
 
         editManga(manga) {
-            this.editingMangaId = manga.docId;
-            this.newManga = {
-                title: manga.title,
-                author: manga.author,
-                cover: manga.cover,
-                synopsis: manga.synopsis,
-                genres: manga.genres ? [...manga.genres] : []
-            };
-            
+            this.isEdit = true;
+            this.editId = manga.id;
+
+            this.form.title = manga.title || '';
+            this.form.author = manga.author || '';
+            this.form.category = manga.category || 'Action';
+            this.form.buyUrl = manga.buyUrl || '';
+            this.form.cover = manga.cover || '';
+            this.form.synopsis = manga.synopsis || '';
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
-        cancelEdit() {
-            this.editingMangaId = null;
-            this.newManga = { title: '', author: '', cover: '', synopsis: '', genres: [] };
+        deleteManga(id) {
+            if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบมังงะเรื่องนี้?")) {
+                db.collection("mangas").doc(id).delete().then(() => {
+                    alert("ลบเรียบร้อยแล้ว");
+                });
+            }
         },
 
-        deleteManga(docId, title) {
-            if (confirm(`คุณแน่ใจนะว่าจะลบเรื่อง "${title}" ทิ้งจริงๆ?`)) {
-                db.collection("mangas").doc(docId).delete()
-                    .then(() => alert("🗑 ลบสำเร็จเรียบร้อย!"))
-                    .catch(err => alert("ลบไม่สำเร็จ: " + err));
-            }
+        resetForm() {
+            this.isEdit = false;
+            this.editId = null;
+            this.form = {
+                title: '',
+                author: '',
+                category: 'Action',
+                buyUrl: '',
+                cover: '',
+                synopsis: ''
+            };
         }
     }
 }

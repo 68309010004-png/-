@@ -14,12 +14,11 @@ const db = firebase.firestore();
 function homeApp() {
     return {
         mangas: [],
-        availableGenres: [],
-        selectedGenre: 'All',
-        searchQuery: '',
-        favorites: [],
+        favoriteIds: [],
         currentUser: null,
-        isAdmin: false,
+        loading: true,
+        searchQuery: '',
+        selectedCategory: 'All',
         showModal: false,
         selectedManga: null,
 
@@ -27,82 +26,76 @@ function homeApp() {
             auth.onAuthStateChanged(user => {
                 this.currentUser = user;
                 if (user) {
-                    this.checkAdminStatus(user.uid);
                     this.fetchFavorites(user.uid);
+                } else {
+                    window.location.href = 'auth.html';
                 }
             });
-
             this.fetchMangas();
         },
 
-        checkAdminStatus(uid) {
-            db.collection("users").doc(uid).get().then(doc => {
-                if (doc.exists && doc.data().role === 'admin') {
-                    this.isAdmin = true;
-                }
-            });
-        },
-
         fetchMangas() {
+            this.loading = true;
             db.collection("mangas").onSnapshot(snapshot => {
-                this.mangas = [];
-                const genreSet = new Set();
-
-                snapshot.forEach(doc => {
+                this.mangas = snapshot.docs.map(doc => {
                     const data = doc.data();
-                    const mangaItem = {
-                        docId: doc.id,
-                        title: data.title || 'ไม่มีชื่อ',
-                        author: data.author || 'ไม่ระบุ',
-                        cover: data.cover || 'https://via.placeholder.com/150',
-                        synopsis: data.synopsis || 'ไม่มีข้อมูลเรื่องย่อ',
-                        genres: Array.isArray(data.genres) ? data.genres : (data.genre ? [data.genre] : [])
+                    let cat = data.category;
+                    if (Array.isArray(cat)) cat = cat[0] || 'Action';
+
+                    return {
+                        id: doc.id,
+                        title: String(data.title || ''),
+                        author: String(data.author || ''),
+                        category: String(cat || 'Action'),
+                        buyUrl: String(data.buyUrl || ''),
+                        cover: String(data.cover || ''),
+                        synopsis: String(data.synopsis || '')
                     };
-
-                    this.mangas.push(mangaItem);
-
-                    mangaItem.genres.forEach(g => {
-                        if (g && typeof g === 'string' && g.trim() !== '') {
-                            genreSet.add(g.trim());
-                        }
-                    });
                 });
-
-                this.availableGenres = Array.from(genreSet);
+                this.loading = false;
             });
         },
 
         fetchFavorites(uid) {
             db.collection("users").doc(uid).collection("favorites").onSnapshot(snapshot => {
-                this.favorites = [];
-                snapshot.forEach(doc => {
-                    this.favorites.push(doc.id);
-                });
+                this.favoriteIds = snapshot.docs.map(doc => doc.id);
             });
         },
 
-        isFavorite(mangaDocId) {
-            return this.favorites.includes(mangaDocId);
+        isFavorite(mangaId) {
+            if (!Array.isArray(this.favoriteIds)) return false;
+            return this.favoriteIds.includes(String(mangaId));
         },
 
         toggleFavorite(manga) {
-            if (!this.currentUser) {
-                alert("กรุณาเข้าสู่ระบบก่อนกดถูกใจการ์ตูนน้า!");
-                window.location.href = 'auth.html';
-                return;
-            }
+            if (!this.currentUser || !manga || !manga.id) return;
+            
+            const mangaIdStr = String(manga.id);
+            const favRef = db.collection("users").doc(this.currentUser.uid).collection("favorites").doc(mangaIdStr);
 
-            const favRef = db.collection("users").doc(this.currentUser.uid).collection("favorites").doc(manga.docId);
-
-            if (this.isFavorite(manga.docId)) {
-                favRef.delete();
+            if (this.isFavorite(mangaIdStr)) {
+                favRef.delete().catch(err => console.error("Remove fav error:", err));
             } else {
                 favRef.set({
-                    addedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    title: manga.title,
-                    cover: manga.cover
-                });
+                    title: String(manga.title || ''),
+                    cover: String(manga.cover || ''),
+                    addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(err => console.error("Add fav error:", err));
             }
+        },
+
+        get filteredMangas() {
+            if (!Array.isArray(this.mangas)) return [];
+            return this.mangas.filter(manga => {
+                const titleStr = String(manga.title || '').toLowerCase();
+                const authorStr = String(manga.author || '').toLowerCase();
+                const searchStr = String(this.searchQuery || '').toLowerCase();
+
+                const matchesSearch = titleStr.includes(searchStr) || authorStr.includes(searchStr);
+                const matchesCategory = this.selectedCategory === 'All' || manga.category === this.selectedCategory;
+                
+                return matchesSearch && matchesCategory;
+            });
         },
 
         openModal(manga) {
@@ -118,20 +111,6 @@ function homeApp() {
         logout() {
             auth.signOut().then(() => {
                 window.location.href = 'auth.html';
-            });
-        },
-
-        get filteredMangas() {
-            return this.mangas.filter(manga => {
-                const matchesGenre = this.selectedGenre === 'All' || 
-                    (manga.genres && manga.genres.includes(this.selectedGenre));
-
-                const query = this.searchQuery.toLowerCase().trim();
-                const matchesSearch = !query || 
-                    manga.title.toLowerCase().includes(query) || 
-                    manga.author.toLowerCase().includes(query);
-
-                return matchesGenre && matchesSearch;
             });
         }
     }
