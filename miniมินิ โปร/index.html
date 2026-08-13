@@ -26,7 +26,18 @@
             <div class="header-top">
                 <h1 class="brand-logo">MangaPick</h1>
                 <div class="user-profile">
-                    <a href="admin.html" class="btn-admin-link"><i class="fas fa-cog"></i> Admin</a>
+                    <!-- ปุ่ม Super Admin (จะขึ้นเฉพาะเมื่อเป็น Super Admin เท่านั้น) -->
+                    <template x-if="userRole === 'superadmin'">
+                        <a href="superadmin.html" class="btn-admin-link" style="background: #fee2e2; color: #dc2626; margin-right: 4px;">
+                            <i class="fas fa-user-shield"></i> Super Admin
+                        </a>
+                    </template>
+
+                    <!-- ปุ่ม Admin (ขึ้นเมื่อเป็น Admin หรือ Super Admin) -->
+                    <template x-if="userRole === 'admin' || userRole === 'superadmin'">
+                        <a href="admin.html" class="btn-admin-link"><i class="fas fa-cog"></i> Admin</a>
+                    </template>
+
                     <button @click="logout()" class="logout-btn">ออกจากระบบ</button>
                 </div>
             </div>
@@ -45,30 +56,21 @@
 
             <!-- Filter Pills -->
             <div class="filter-scroll">
-                <button 
-                    class="filter-pill" 
-                    :class="{ 'active': selectedCategory === 'All' }"
-                    @click="selectedCategory = 'All'">All</button>
-                <button 
-                    class="filter-pill" 
-                    :class="{ 'active': selectedCategory === 'Action' }"
-                    @click="selectedCategory = 'Action'">Action</button>
-                <button 
-                    class="filter-pill" 
-                    :class="{ 'active': selectedCategory === 'Fantasy' }"
-                    @click="selectedCategory = 'Fantasy'">Fantasy</button>
-                <button 
-                    class="filter-pill" 
-                    :class="{ 'active': selectedCategory === 'Sci-Fi' }"
-                    @click="selectedCategory = 'Sci-Fi'">Sci-Fi</button>
-                <button 
-                    class="filter-pill" 
-                    :class="{ 'active': selectedCategory === 'Comedy' }"
-                    @click="selectedCategory = 'Comedy'">Comedy</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'All' }" @click="selectedCategory = 'All'">All</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Action' }" @click="selectedCategory = 'Action'">Action</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Fantasy' }" @click="selectedCategory = 'Fantasy'">Fantasy</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Sci-Fi' }" @click="selectedCategory = 'Sci-Fi'">Sci-Fi</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Comedy' }" @click="selectedCategory = 'Comedy'">Comedy</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Romance' }" @click="selectedCategory = 'Romance'">Romance</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Drama' }" @click="selectedCategory = 'Drama'">Drama</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Horror' }" @click="selectedCategory = 'Horror'">Horror</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Mystery' }" @click="selectedCategory = 'Mystery'">Mystery</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Sports' }" @click="selectedCategory = 'Sports'">Sports</button>
+                <button class="filter-pill" :class="{ 'active': selectedCategory === 'Isekai' }" @click="selectedCategory = 'Isekai'">Isekai</button>
             </div>
         </header>
 
-        <!-- Main Content (Manga Grid) -->
+        <!-- Main Content -->
         <main class="manga-grid">
             <template x-for="manga in filteredMangas" :key="manga.id">
                 <div class="manga-card" @click="openModal(manga)">
@@ -93,11 +95,10 @@
                 </div>
             </template>
 
-            <!-- แสดงเมื่อค้นหาไม่พบ -->
             <template x-if="filteredMangas.length === 0 && !loading">
                 <div class="empty-state">
                     <i class="fas fa-search empty-icon"></i>
-                    <p class="empty-title">ไม่พบมังงะที่คุณค้นหา</p>
+                    <p class="empty-title">ไม่พบมังงะในหมวดนี้</p>
                 </div>
             </template>
         </main>
@@ -114,7 +115,7 @@
             </a>
         </nav>
 
-        <!-- Modal เรื่องย่อ + ปุ่มสั่งซื้อเล่มแท้ -->
+        <!-- Modal -->
         <div class="modal-overlay" x-show="showModal" @click.self="closeModal()" x-transition>
             <div class="modal-content" x-show="showModal" x-transition>
                 <button class="modal-close-btn" @click="closeModal()">&times;</button>
@@ -131,7 +132,6 @@
                             <p x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></p>
                         </div>
 
-                        <!-- ปุ่มวาร์ปไปซื้อเล่มลิขสิทธิ์ -->
                         <template x-if="selectedManga.buyUrl">
                             <a :href="selectedManga.buyUrl" target="_blank" rel="noopener" class="btn-buy-manga">
                                 <i class="fas fa-shopping-cart"></i>

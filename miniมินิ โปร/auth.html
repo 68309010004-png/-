@@ -13,48 +13,47 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <script src="js/auth.js" defer></script>
+    <script src="js/auth.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
 
     <div class="auth-container" x-data="authApp()" x-cloak>
         <div class="auth-card">
-            
-            <!-- ปุ่มย้อนกลับหน้าหลัก (วางมุมซ้ายบนของการ์ด) -->
-            <a href="index.html" class="btn-back-home">
-                <i class="fas fa-arrow-left"></i>
-                <span>หน้าหลัก</span>
-            </a>
+            <h1 class="auth-brand">MangaPick</h1>
+            <p class="auth-subtitle" x-text="isSignUp ? 'สร้างบัญชีใหม่เพื่อสะสมมังงะ' : 'เข้าสู่ระบบคลังมังงะส่วนตัวของคุณ'"></p>
 
-            <!-- Header ของการ์ด -->
-            <div class="auth-header">
-                <h1 class="brand-logo">MangaPick</h1>
-                <p class="auth-subtitle" x-text="isSignUp ? 'สร้างบัญชีใหม่เพื่อเริ่มสะสมมังงะ' : 'เข้าสู่ระบบคลังมังงะส่วนตัวของคุณ'"></p>
+            <!-- ปุ่ม Google Sign-In -->
+            <button type="button" @click="loginWithGoogle()" class="btn-google">
+                <i class="fab fa-google" style="color: #ea4335; font-size: 1.1rem;"></i>
+                <span x-text="isSignUp ? 'สมัครสมาชิกด้วย Google' : 'เข้าสู่ระบบด้วย Google'"></span>
+            </button>
+
+            <div class="divider">
+                <span>หรือ</span>
             </div>
 
-            <!-- ฟอร์มเข้าสู่ระบบ / สมัครสมาชิก -->
+            <!-- Form ล็อกอิน/สมัครปกติ -->
             <form @submit.prevent="handleSubmit()" class="auth-form">
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" x-model="email" placeholder="name@example.com" required class="form-input">
+                    <input type="email" x-model="email" placeholder="example@email.com" required class="form-control">
                 </div>
 
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" x-model="password" placeholder="••••••••" required class="form-input">
+                    <input type="password" x-model="password" placeholder="••••••••" required class="form-control">
                 </div>
 
                 <button type="submit" class="btn-submit" x-text="isSignUp ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'"></button>
             </form>
 
-            <!-- ปุ่มสลับโหมด Sign In / Sign Up -->
             <div class="auth-toggle">
-                <button type="button" @click="isSignUp = !isSignUp" class="btn-toggle-mode">
-                    <span x-text="isSignUp ? 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบที่นี่' : 'ยังไม่มีบัญชีใช่ไหม? สมัครสมาชิกที่นี่'"></span>
-                </button>
+                <p>
+                    <span x-text="isSignUp ? 'มีบัญชีอยู่แล้ว?' : 'ยังไม่มีบัญชีใช่ไหม?'"></span>
+                    <a href="#" @click.prevent="isSignUp = !isSignUp" x-text="isSignUp ? 'เข้าสู่ระบบที่นี่' : 'สมัครสมาชิกที่นี่'"></a>
+                </p>
             </div>
-
         </div>
     </div>
 

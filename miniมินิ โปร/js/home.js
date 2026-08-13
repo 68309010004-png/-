@@ -16,6 +16,7 @@ function homeApp() {
         mangas: [],
         favoriteIds: [],
         currentUser: null,
+        userRole: 'user',
         loading: true,
         searchQuery: '',
         selectedCategory: 'All',
@@ -26,12 +27,21 @@ function homeApp() {
             auth.onAuthStateChanged(user => {
                 this.currentUser = user;
                 if (user) {
+                    this.checkUserRole(user.uid);
                     this.fetchFavorites(user.uid);
                 } else {
                     window.location.href = 'auth.html';
                 }
             });
             this.fetchMangas();
+        },
+
+        checkUserRole(uid) {
+            db.collection("users").doc(uid).get().then(doc => {
+                if (doc.exists) {
+                    this.userRole = doc.data().role || 'user';
+                }
+            });
         },
 
         fetchMangas() {
@@ -86,12 +96,14 @@ function homeApp() {
 
         get filteredMangas() {
             if (!Array.isArray(this.mangas)) return [];
+            
+            const query = String(this.searchQuery || '').trim().toLowerCase();
+
             return this.mangas.filter(manga => {
                 const titleStr = String(manga.title || '').toLowerCase();
                 const authorStr = String(manga.author || '').toLowerCase();
-                const searchStr = String(this.searchQuery || '').toLowerCase();
 
-                const matchesSearch = titleStr.includes(searchStr) || authorStr.includes(searchStr);
+                const matchesSearch = !query || titleStr.includes(query) || authorStr.includes(query);
                 const matchesCategory = this.selectedCategory === 'All' || manga.category === this.selectedCategory;
                 
                 return matchesSearch && matchesCategory;

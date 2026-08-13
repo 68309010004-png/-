@@ -3,16 +3,14 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
-    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    background-color: #f4f3ef; /* สีพื้นหลังโทนเดียวกับในรูป */
-    color: #2d3748;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: #f1f5f9;
     min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 20px;
 }
 
@@ -22,154 +20,164 @@ body {
 
 .auth-container {
     width: 100%;
-    max-width: 420px;
-    display: flex;
-    justify-content: center;
+    max-width: 400px;
 }
 
-/* กล่องการ์ดสีขาว */
 .auth-card {
-    position: relative; /* สำคัญมาก! เพื่อให้อ้างอิงตำแหน่งปุ่มย้อนกลับ */
-    width: 100%;
     background: #ffffff;
+    padding: 32px 24px;
     border-radius: 20px;
-    padding: 40px 28px 28px 28px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    text-align: center;
+    position: relative;
 }
 
-/* ปุ่มย้อนกลับหน้าหลักมุมซ้ายบน */
-.btn-back-home {
+.btn-back {
     position: absolute;
-    top: 16px;
-    left: 16px;
+    top: 20px;
+    left: 20px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #718096;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 20px;
-    background: #f7fafc;
-    border: 1px solid #edf2f7;
-    transition: all 0.2s ease;
+    transition: color 0.2s;
 }
 
-.btn-back-home:hover {
-    background: #edf2f7;
+.btn-back:hover {
+    color: #0f172a;
+}
+
+.auth-brand {
     color: #10b981;
-    transform: translateX(-2px);
-}
-
-.btn-back-home i {
-    font-size: 0.75rem;
-}
-
-/* Header ของการ์ด */
-.auth-header {
-    text-align: center;
-    margin-top: 15px;
-    margin-bottom: 24px;
-    width: 100%;
-}
-
-.brand-logo {
     font-size: 2rem;
     font-weight: 800;
-    color: #10b981; /* สีเขียวโลโก้ */
-    letter-spacing: -0.5px;
+    margin-top: 15px;
     margin-bottom: 4px;
+    letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
-    font-size: 0.8rem;
-    color: #a0aec0;
-    font-weight: 600;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
 }
 
-/* Form Styles */
-.auth-form {
+/* Google Sign-In Button */
+.btn-google {
     width: 100%;
+    padding: 12px;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.btn-google:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+/* Divider Line */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 18px 0;
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.divider::before, 
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.divider span {
+    padding: 0 12px;
+}
+
+/* Form Elements */
+.auth-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    text-align: left;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    text-align: left;
 }
 
 .form-group label {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #4a5568;
+    color: #334155;
 }
 
-.form-input {
+.form-control {
     width: 100%;
-    padding: 12px 16px;
-    background: #eae8e1; /* สีช่องอินพุตตามรูป */
-    border: 1px solid transparent;
-    border-radius: 10px;
-    font-size: 0.9rem;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.95rem;
     outline: none;
-    color: #2d3748;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+    color: #1e293b;
 }
 
-.form-input:focus {
-    background: #ffffff;
+.form-control:focus {
     border-color: #10b981;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
-/* ปุ่มเข้าสู่ระบบ / สมัครสมาชิก */
 .btn-submit {
     width: 100%;
     padding: 12px;
     background: #10b981;
-    color: white;
+    color: #ffffff;
     border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    border-radius: 12px;
     font-weight: 700;
+    font-size: 0.95rem;
     cursor: pointer;
-    margin-top: 8px;
-    transition: all 0.2s;
+    margin-top: 6px;
+    transition: background 0.2s ease;
 }
 
 .btn-submit:hover {
     background: #059669;
 }
 
-.btn-submit:active {
-    transform: scale(0.98);
-}
-
-/* ปุ่มสลับโหมดด้านล่าง */
 .auth-toggle {
     margin-top: 20px;
-    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
 }
 
-.btn-toggle-mode {
-    background: #e2e8f0;
-    border: 1px solid #cbd5e0;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #2d3748;
-    cursor: pointer;
-    transition: all 0.2s;
+.auth-toggle a {
+    color: #10b981;
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 4px;
 }
 
-.btn-toggle-mode:hover {
-    background: #cbd5e0;
+.auth-toggle a:hover {
+    text-decoration: underline;
 }

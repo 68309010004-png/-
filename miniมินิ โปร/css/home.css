@@ -3,87 +3,104 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
-    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    background-color: #f8f9fa;
-    color: #2d3748;
+    background-color: #f8fafc;
+    color: #1e293b;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
     min-height: 100vh;
 }
 
-[x-cloak] { display: none !important; }
+[x-cloak] { 
+    display: none !important; 
+}
 
+/* App Container - รองรับทั้ง PC และ Mobile */
 .app-container {
     width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    background-color: #ffffff;
+    max-width: 100%; /* ตั้งเป็น 100% สำหรับมือถือ */
+    background: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
-    box-shadow: 0 0 20px rgba(0,0,0,0.08);
-    padding-bottom: 80px;
+    padding-bottom: 70px;
 }
 
-/* Header */
+/* App Header */
 .app-header {
-    padding: 20px 20px 10px 20px;
+    padding: 16px 20px 12px 20px;
     background: #ffffff;
-    border-bottom: 1px solid #edf2f7;
     position: sticky;
     top: 0;
     z-index: 10;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .header-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .brand-logo {
     font-size: 1.5rem;
     font-weight: 800;
-    color: #1a202c;
+    color: #10b981;
     letter-spacing: -0.5px;
 }
 
 .user-profile {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 .btn-admin-link {
-    text-decoration: none;
     font-size: 0.75rem;
-    padding: 4px 10px;
-    background: #eef2ff;
-    color: #4f46e5;
-    border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    background: #e0e7ff;
+    color: #4338ca;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
 }
 
 .logout-btn {
-    border: none;
-    background: none;
-    color: #a0aec0;
     font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #64748b;
     cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
 .user-email {
-    font-size: 0.75rem;
-    color: #a0aec0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
     margin-bottom: 12px;
+    word-break: break-all;
 }
 
-/* Search Box */
+/* Search Bar */
 .search-box {
     position: relative;
     margin-bottom: 12px;
@@ -94,46 +111,51 @@ body {
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #a0aec0;
-    font-size: 0.85rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 
 .search-input {
     width: 100%;
-    padding: 10px 12px 10px 38px;
+    padding: 10px 14px 10px 38px;
     border-radius: 12px;
-    border: 1px solid #edf2f7;
+    border: 1px solid #e2e8f0;
     background: #f8fafc;
     font-size: 0.85rem;
     outline: none;
+    transition: all 0.2s;
 }
 
 .search-input:focus {
     border-color: #10b981;
     background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-/* Filter Pills */
+/* Category Filter Scroll */
 .filter-scroll {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
     scrollbar-width: none;
 }
 
-.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-scroll::-webkit-scrollbar {
+    display: none;
+}
 
 .filter-pill {
-    padding: 6px 16px;
+    padding: 6px 14px;
     border-radius: 20px;
-    border: 1px solid #edf2f7;
+    border: 1px solid #e2e8f0;
     background: #ffffff;
-    color: #718096;
+    color: #64748b;
     font-size: 0.8rem;
     font-weight: 600;
-    cursor: pointer;
     white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .filter-pill.active {
@@ -142,38 +164,37 @@ body {
     border-color: #10b981;
 }
 
-/* Manga Grid */
+/* Manga Grid List - Default 2 คอลัมน์บนมือถือ */
 .manga-grid {
-    padding: 16px 20px;
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    flex: 1;
 }
 
 .manga-card {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s;
 }
 
-.manga-card:active { transform: scale(0.97); }
+.manga-card:hover {
+    transform: translateY(-4px);
+}
 
 .manga-cover-wrapper {
     position: relative;
     width: 100%;
-    padding-top: 140%;
+    aspect-ratio: 3 / 4;
     border-radius: 12px;
     overflow: hidden;
-    background: #edf2f7;
-    margin-bottom: 8px;
+    background: #f1f5f9;
 }
 
 .manga-img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -186,24 +207,31 @@ body {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(4px);
     border: none;
+    color: #cbd5e1;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cbd5e0;
+    font-size: 0.9rem;
     cursor: pointer;
-    z-index: 2;
-    transition: color 0.2s;
+    transition: all 0.2s;
 }
 
-.fav-btn.is-fav { color: #ef4444; }
+.fav-btn.is-fav {
+    color: #ef4444;
+    background: #ffffff;
+}
+
+.manga-info {
+    padding: 8px 4px 4px 4px;
+}
 
 .manga-title {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #2d3748;
+    color: #1e293b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -211,31 +239,23 @@ body {
 
 .manga-author {
     font-size: 0.75rem;
-    color: #a0aec0;
-    margin-top: 2px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 40px;
-    color: #a0aec0;
-}
-
-/* Bottom Nav */
+/* Bottom Navigation (สำหรับ Mobile) */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
     width: 100%;
-    max-width: 480px;
-    height: 60px;
     background: #ffffff;
-    border-top: 1px solid #edf2f7;
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid #f1f5f9;
     z-index: 20;
 }
 
@@ -245,14 +265,20 @@ body {
     align-items: center;
     gap: 4px;
     text-decoration: none;
-    color: #a0aec0;
-    font-size: 0.75rem;
+    color: #94a3b8;
+    font-size: 0.7rem;
     font-weight: 600;
 }
 
-.nav-item.active { color: #10b981; }
+.nav-item i {
+    font-size: 1.1rem;
+}
 
-/* Modal */
+.nav-item.active {
+    color: #10b981;
+}
+
+/* Modal Popup */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -262,55 +288,76 @@ body {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     z-index: 100;
-    padding: 20px;
+    padding: 16px;
 }
 
 .modal-content {
-    background: white;
-    border-radius: 16px;
+    background: #ffffff;
     width: 100%;
     max-width: 400px;
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
     max-height: 85vh;
     overflow-y: auto;
-    padding: 24px;
-    position: relative;
 }
 
 .modal-close-btn {
     position: absolute;
-    top: 12px;
+    top: 14px;
     right: 16px;
-    font-size: 1.8rem;
+    background: #f1f5f9;
     border: none;
-    background: none;
-    color: #a0aec0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.2rem;
     cursor: pointer;
+    color: #64748b;
 }
 
 .modal-cover-box {
-    width: 140px;
-    height: 200px;
-    margin: 0 auto 16px auto;
-    border-radius: 12px;
+    width: 130px;
+    height: 175px;
+    margin: 0 auto 12px auto;
+    border-radius: 10px;
     overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.modal-cover-img { width: 100%; height: 100%; object-fit: cover; }
-.modal-title { font-size: 1.2rem; font-weight: 800; text-align: center; margin-bottom: 4px; }
-.modal-author { font-size: 0.85rem; text-align: center; color: #718096; margin-bottom: 12px; }
+.modal-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-title {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.modal-author {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 12px;
+}
 
 .modal-synopsis {
-    background: #f7fafc;
-    padding: 12px 16px;
-    border-radius: 12px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 10px;
     font-size: 0.85rem;
-    color: #4a5568;
+    color: #334155;
+    line-height: 1.5;
+    margin-bottom: 16px;
 }
 
-/* ปุ่มสั่งซื้อลิขสิทธิ์ */
 .btn-buy-manga {
     display: flex;
     align-items: center;
@@ -318,15 +365,63 @@ body {
     gap: 8px;
     width: 100%;
     padding: 12px;
-    margin-top: 16px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    font-weight: 700;
-    font-size: 0.85rem;
+    background: #10b981;
+    color: #ffffff;
     text-decoration: none;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-    transition: transform 0.2s;
+    font-weight: 700;
+    font-size: 0.85rem;
 }
 
-.btn-buy-manga:active { transform: scale(0.98); }
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px 0;
+    color: #94a3b8;
+}
+
+/* ========================================================== */
+/* 💻 PC / Tablet Layout (Responsive สำหรับหน้าจอใหญ่ > 768px) */
+/* ========================================================== */
+@media (min-width: 768px) {
+    body {
+        background-color: #f1f5f9;
+    }
+
+    .app-container {
+        max-width: 1100px;
+        margin: 20px auto;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        padding-bottom: 70px; /* เว้นพื้นที่ให้ Bottom Nav บน PC */
+        overflow: hidden;
+    }
+
+    .app-header {
+        border-radius: 20px 20px 0 0;
+        padding: 24px 32px 16px 32px;
+    }
+
+    /* ขยายมังงะเป็น 4-5 คอลัมน์ */
+    .manga-grid {
+        padding: 24px 32px;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+    }
+
+    .manga-title {
+        font-size: 0.9rem;
+    }
+
+    /* แสดง Bottom Nav ให้อยู่ล่างสุดของ Container บน PC */
+    .bottom-nav {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
+    }
+}

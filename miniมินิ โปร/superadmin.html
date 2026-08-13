@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - MangaPick</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/superadmin.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="js/superadmin.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+
+    <div class="superadmin-container" x-data="superAdminApp()" x-init="init()" x-cloak>
+        <header class="superadmin-header">
+            <div>
+                <h1><i class="fas fa-user-shield"></i> Super Admin</h1>
+                <p>จัดการระดับสิทธิ์ของผู้ใช้งานทุกคนในระบบ</p>
+            </div>
+            <div class="header-actions">
+                <a href="admin.html" class="btn-nav"><i class="fas fa-cog"></i> หน้า Admin</a>
+                <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> หน้าหลัก</a>
+            </div>
+        </header>
+
+        <main class="superadmin-content">
+
+            <section class="card-box">
+                <div class="card-header-flex">
+                    <h2 class="card-title">
+                        <i class="fas fa-users-cog"></i> 
+                        สิทธิ์ผู้ใช้งาน (<span x-text="allUsers.length"></span>)
+                    </h2>
+                    <input 
+                        type="text" 
+                        x-model="searchQuery" 
+                        placeholder="ค้นหาด้วย Email..." 
+                        class="search-user-input"
+                    >
+                </div>
+                
+                <div class="user-table-wrapper">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Email ผู้ใช้งาน</th>
+                                <th>สิทธิ์ปัจจุบัน</th>
+                                <th>เปลี่ยนสิทธิ์ (Role)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="user in filteredUsers" :key="user.id">
+                                <tr>
+                                    <td x-text="user.email" class="user-email-td"></td>
+                                    <td>
+                                        <span class="badge-role" :class="user.role" x-text="user.role.toUpperCase()"></span>
+                                    </td>
+                                    <td>
+                                        <template x-if="user.id !== currentUserId">
+                                            <select 
+                                                class="role-select" 
+                                                :value="user.role" 
+                                                @change="changeUserRole(user.id, user.email, $event.target.value)"
+                                            >
+                                                <option value="user">USER (ผู้ใช้)</option>
+                                                <option value="admin">ADMIN (แอดมิน)</option>
+                                                <option value="superadmin">SUPERADMIN (แอดมินสูงสุด)</option>
+                                            </select>
+                                        </template>
+
+                                        <template x-if="user.id === currentUserId">
+                                            <span class="self-account-tag">(คุณอยู่)</span>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+</body>
+</html>
