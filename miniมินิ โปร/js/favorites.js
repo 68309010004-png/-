@@ -1,92 +1,119 @@
-const firebaseConfig = {
-    apiKey: "AIzaSyDrlE3BW6DL729ltElYPRlruFCoig-Ibgc",
-    authDomain: "m-fkjdshujfbdou.firebaseapp.com",
-    projectId: "m-fkjdshujfbdou",
-    storageBucket: "m-fkjdshujfbdou.firebasestorage.app",
-    messagingSenderId: "1081777451090",
-    appId: "1:1081777451090:web:1ec56a4455700307512f8b"
-};
-
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-function favoritesApp() {
-    return {
-        favoriteMangas: [],
-        currentUser: null,
-        loading: true,
-        showModal: false,
+document.addEventListener('alpine:init', () => {
+    Alpine.data('favoritesApp', () => ({
+        userEmail: '',
+        userRole: 'user',
+        userId: null, // เก็บ UID ไว้ใช้งานทั่วทั้งคอมโพเนนต์
+        favorites: [],
+        searchQuery: '',
         selectedManga: null,
 
         init() {
-            auth.onAuthStateChanged(user => {
-                this.currentUser = user;
+            // เช็กสถานะการล็อกอิน
+            auth.onAuthStateChanged(async (user) => {
                 if (user) {
-                    this.fetchFavorites(user.uid);
+                    this.userId = user.uid;
+                    this.userEmail = user.email;
+                    await this.fetchUserRole(user.uid);
+                    this.loadFavorites(user.uid);
                 } else {
-                    this.loading = false;
-                    alert("กรุณาเข้าสู่ระบบเพื่อดูคลังมังงะโปรดของคุณ");
                     window.location.href = 'auth.html';
                 }
             });
         },
 
-        fetchFavorites(uid) {
-            this.loading = true;
-            db.collection("users").doc(uid).collection("favorites").onSnapshot(async (snapshot) => {
-                const favList = [];
-                
-                for (const doc of snapshot.docs) {
-                    const favData = doc.data();
-                    const mangaDocId = doc.id;
+        async fetchUserRole(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    this.userRole = doc.data().role || 'user';
+                }
+            } catch (err) {
+                console.error("Error fetching user role:", err);
+            }
+        },
 
-                    let fullMangaData = {};
-                    try {
-                        const mangaSnap = await db.collection("mangas").doc(mangaDocId).get();
-                        if (mangaSnap.exists) {
-                            fullMangaData = mangaSnap.data();
-                        }
-                    } catch (e) {
-                        console.log("Error fetching manga details:", e);
-                    }
-
-                    favList.push({
-                        docId: mangaDocId,
-                        title: favData.title || fullMangaData.title || 'ไม่มีชื่อ',
-                        cover: favData.cover || fullMangaData.cover || 'https://via.placeholder.com/150',
-                        author: fullMangaData.author || 'ไม่ระบุ',
-                        synopsis: fullMangaData.synopsis || 'ไม่มีข้อมูลเรื่องย่อ',
-                        buyUrl: fullMangaData.buyUrl || ''
-                    });
+        loadFavorites(uid) {
+            // ดึงข้อมูล Realtime จาก subcollection 'favorites'
+            db.collection('users').doc(uid).collection('favorites').onSnapshot(async (favSnap) => {
+                if (favSnap.empty) {
+                    this.favorites = [];
+                    return;
                 }
 
-                this.favoriteMangas = favList;
-                this.loading = false;
+                // ดึงข้อมูลมังงะจากคอลเลกชัน 'mangas' (มี s)
+                const fetchPromises = favSnap.docs.map(async (favDoc) => {
+                    const mangaId = favDoc.id;
+                    const mangaDoc = await db.collection('mangas').doc(mangaId).get();
+                    
+                    if (mangaDoc.exists) {
+                        const data = mangaDoc.data();
+                        return { 
+                            id: mangaDoc.id, 
+                            title: data.title || '',
+                            author: data.author || '',
+                            cover: data.cover || data.coverUrl || '',
+                            synopsis: data.synopsis || '',
+                            buyUrl: data.buyUrl || data.affiliateUrl || ''
+                        };
+                    } else {
+                        // กรณีมังงะถูกลบออกจากระบบหลักไปแล้ว แต่ยังมีค้างในคลังโปรด
+                        const data = favDoc.data();
+                        return {
+                            id: favDoc.id,
+                            title: data.title || '',
+                            author: data.author || '',
+                            cover: data.cover || '',
+                            synopsis: data.synopsis || '',
+                            buyUrl: data.buyUrl || ''
+                        };
+                    }
+                });
+
+                const results = await Promise.all(fetchPromises);
+                this.favorites = results.filter(item => item !== null);
+            }, (err) => {
+                console.error("Error listening to favorites:", err);
             });
         },
 
-        removeFavorite(mangaDocId) {
-            if (!this.currentUser) return;
-            
-            db.collection("users").doc(this.currentUser.uid)
-              .collection("favorites").doc(mangaDocId).delete()
-              .then(() => {
-                  console.log("Removed from favorites");
-              })
-              .catch(err => {
-                  alert("เกิดข้อผิดพลาดในการลบ: " + err.message);
-              });
+        get filteredFavorites() {
+            if (!this.searchQuery.trim()) return this.favorites;
+            const query = this.searchQuery.toLowerCase();
+            return this.favorites.filter(manga => 
+                (manga.title && manga.title.toLowerCase().includes(query)) || 
+                (manga.author && manga.author.toLowerCase().includes(query))
+            );
+        },
+
+        async removeFavorite(mangaId) {
+            if (!this.userId || !mangaId) return;
+
+            try {
+                const mangaIdStr = String(mangaId);
+                
+                // ลบออกจาก Firestore ด้วยไวยากรณ์ v8 Compat
+                await db.collection('users').doc(this.userId).collection('favorites').doc(mangaIdStr).delete();
+                
+                // ตัดรายการออกจากหน้าจอทันที
+                this.favorites = this.favorites.filter(manga => String(manga.id) !== mangaIdStr);
+            } catch (err) {
+                console.error("Error removing favorite:", err);
+                alert("เกิดข้อผิดพลาดในการลบรายการโปรด: " + err.message);
+            }
         },
 
         openModal(manga) {
             this.selectedManga = manga;
-            this.showModal = true;
         },
 
         closeModal() {
-            this.showModal = false;
             this.selectedManga = null;
+        },
+
+        logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'auth.html';
+            });
         }
-    }
-}
+    }));
+});
