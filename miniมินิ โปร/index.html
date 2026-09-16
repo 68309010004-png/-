@@ -8,19 +8,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/home.css">
-    
+   
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
+   
     <script src="js/home.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
-
     <div class="app-container" x-data="homeApp()" x-cloak>
-        
+       
         <!-- Header Section -->
         <header class="app-header">
             <div class="header-top">
@@ -32,28 +31,24 @@
                             <i class="fas fa-user-shield"></i> Super Admin
                         </a>
                     </template>
-
                     <!-- ปุ่ม Admin (ขึ้นเมื่อเป็น Admin หรือ Super Admin) -->
                     <template x-if="userRole === 'admin' || userRole === 'superadmin'">
                         <a href="admin.html" class="btn-admin-link"><i class="fas fa-cog"></i> Admin</a>
                     </template>
-
                     <button @click="logout()" class="logout-btn">ออกจากระบบ</button>
                 </div>
             </div>
             <p class="user-email" x-text="currentUser ? currentUser.email : 'กำลังโหลด...'"></p>
-
             <!-- Search Bar -->
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
-                <input 
-                    type="text" 
-                    placeholder="ค้นหาชื่อเรื่องหรือผู้แต่ง..." 
-                    x-model="searchQuery" 
+                <input
+                    type="text"
+                    placeholder="ค้นหาชื่อเรื่องหรือผู้แต่ง..."
+                    x-model="searchQuery"
                     class="search-input"
                 >
             </div>
-
             <!-- Filter Pills -->
             <div class="filter-scroll">
                 <button class="filter-pill" :class="{ 'active': selectedCategory === 'All' }" @click="selectedCategory = 'All'">All</button>
@@ -69,21 +64,20 @@
                 <button class="filter-pill" :class="{ 'active': selectedCategory === 'Isekai' }" @click="selectedCategory = 'Isekai'">Isekai</button>
             </div>
         </header>
-
         <!-- Main Content -->
         <main class="manga-grid">
             <template x-for="manga in filteredMangas" :key="manga.id">
                 <div class="manga-card" @click="openModal(manga)">
                     <div class="manga-cover-wrapper">
-                        <img 
-                            :src="manga.cover" 
-                            :alt="manga.title" 
+                        <img
+                            :src="manga.cover"
+                            :alt="manga.title"
                             class="manga-img"
                             onerror="this.onerror=null; this.src='https://images.weserv.nl/?url=https://i.pinimg.com/736x/8f/3e/68/8f3e68f3074360e206b12a83e0c031d2.jpg';"
                         />
-                        <button 
-                            class="fav-btn" 
-                            :class="{ 'is-fav': isFavorite(manga.id) }" 
+                        <button
+                            class="fav-btn"
+                            :class="{ 'is-fav': isFavorite(manga.id) }"
                             @click.stop="toggleFavorite(manga)">
                             <i class="fas fa-heart"></i>
                         </button>
@@ -94,7 +88,6 @@
                     </div>
                 </div>
             </template>
-
             <template x-if="filteredMangas.length === 0 && !loading">
                 <div class="empty-state">
                     <i class="fas fa-search empty-icon"></i>
@@ -102,7 +95,6 @@
                 </div>
             </template>
         </main>
-
         <!-- Navigation Bar -->
         <nav class="bottom-nav">
             <a href="index.html" class="nav-item active">
@@ -114,7 +106,6 @@
                 <span>My Library</span>
             </a>
         </nav>
-
         <!-- Modal -->
         <div class="modal-overlay" x-show="showModal" @click.self="closeModal()" x-transition>
             <div class="modal-content" x-show="showModal" x-transition>
@@ -126,12 +117,11 @@
                         </div>
                         <h2 class="modal-title" x-text="selectedManga.title"></h2>
                         <p class="modal-author" x-text="'ผู้แต่ง: ' + (selectedManga.author || 'ไม่ระบุ')"></p>
-                        
+                       
                         <div class="modal-synopsis">
                             <h4>เรื่องย่อ</h4>
                             <p x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></p>
                         </div>
-
                         <template x-if="selectedManga.buyUrl">
                             <a :href="selectedManga.buyUrl" target="_blank" rel="noopener" class="btn-buy-manga">
                                 <i class="fas fa-shopping-cart"></i>
@@ -139,12 +129,15 @@
                                 <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
                             </a>
                         </template>
+                        <!-- ปรับให้อยู่นอก Template เพื่อให้แสดงผลเสมอและไม่เกิดบั๊กกับ Alpine -->
+                        <a :href="'reviews.html?id=' + selectedManga.id" class="btn-buy-manga" style="background: #3b82f6; margin-top: 8px;">
+                            <i class="fas fa-star"></i>
+                            <span>ดูรีวิว & ให้คะแนน</span>
+                        </a>
                     </div>
                 </template>
             </div>
         </div>
-
     </div>
-
 </body>
 </html>

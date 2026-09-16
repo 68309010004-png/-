@@ -6,10 +6,9 @@
     <title>My Library - MangaPick</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+   
     <!-- ใช้ CSS ตัวเดียวกับ Home เพื่อความสอดคล้องทั้ง Mobile และ PC -->
     <link rel="stylesheet" href="css/home.css">
-
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -19,14 +18,13 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
-
     <div class="app-container" x-data="favoritesApp()" x-cloak>
-        
+       
         <!-- App Header -->
         <header class="app-header">
             <div class="header-top">
                 <h1 class="brand-logo"><i class="fas fa-heart text-danger"></i> My Library</h1>
-                
+               
                 <div class="user-profile">
                     <template x-if="userRole === 'superadmin'">
                         <a href="superadmin.html" class="btn-admin-link" style="background: #fee2e2; color: #dc2626;">
@@ -41,16 +39,14 @@
                     <button @click="logout()" class="logout-btn">ออกจากระบบ</button>
                 </div>
             </div>
-            
+           
             <p class="user-email" x-text="userEmail || 'คลังมังงะส่วนตัวของคุณ'"></p>
-
             <!-- Search Box ในคลังโปรด -->
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" x-model="searchQuery" placeholder="ค้นหามังงะที่บันทึกไว้..." class="search-input">
             </div>
         </header>
-
         <!-- Content Grid List -->
         <main class="manga-grid">
             <template x-for="manga in filteredFavorites" :key="manga.id">
@@ -67,14 +63,12 @@
                     </div>
                 </div>
             </template>
-
             <!-- Empty State ถ้ายังไม่มีมังงะในคลัง -->
             <div class="empty-state" x-show="filteredFavorites.length === 0">
                 <div class="empty-icon"><i class="fas fa-bookmark"></i></div>
                 <p x-text="searchQuery ? 'ไม่พบมังงะที่ค้นหา' : 'ยังไม่มีมังงะในคลังโปรดของคุณ'"></p>
             </div>
         </main>
-
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <a href="index.html" class="nav-item">
@@ -86,7 +80,6 @@
                 <span>My Library</span>
             </a>
         </nav>
-
         <!-- Modal Popup ดูรายละเอียด -->
         <div class="modal-overlay" x-show="selectedManga" x-transition.opacity @click.self="closeModal()">
             <div class="modal-content" x-show="selectedManga" x-transition.scale>
@@ -94,25 +87,28 @@
                 <template x-if="selectedManga">
                     <div>
                         <div class="modal-cover-box">
-                        <img :src="selectedManga.cover" :alt="selectedManga.title" class="modal-cover-img">
-                    </div>
-                    <h2 class="modal-title" x-text="selectedManga.title"></h2>
-                    <p class="modal-author" x-text="'ผู้แต่ง: ' + selectedManga.author"></p>
-                    <div class="modal-synopsis">
-                        <strong style="display:block; margin-bottom: 4px;">เรื่องย่อ:</strong>
-                        <span x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></span>
-                    </div>
-                    <template x-if="selectedManga && selectedManga.buyUrl">
-                        <a :href="selectedManga.buyUrl" target="_blank" class="btn-buy-manga">
-                            <i class="fas fa-shopping-cart"></i> ซื้อเล่มลิขสิทธิ์ / อ่านเพิ่ม
+                            <img :src="selectedManga.cover" :alt="selectedManga.title" class="modal-cover-img">
+                        </div>
+                        <h2 class="modal-title" x-text="selectedManga.title"></h2>
+                        <p class="modal-author" x-text="'ผู้แต่ง: ' + selectedManga.author"></p>
+                        <div class="modal-synopsis">
+                            <strong style="display:block; margin-bottom: 4px;">เรื่องย่อ:</strong>
+                            <span x-text="selectedManga.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'"></span>
+                        </div>
+                        <template x-if="selectedManga && selectedManga.buyUrl">
+                            <a :href="selectedManga.buyUrl" target="_blank" class="btn-buy-manga">
+                                <i class="fas fa-shopping-cart"></i> ซื้อเล่มลิขสิทธิ์ / อ่านเพิ่ม
+                            </a>
+                        </template>
+                        <!-- เพิ่มปุ่มรีวิวให้สามารถเข้าถึงได้จากคลัง My Library ด้วยเช่นกัน -->
+                        <a :href="'reviews.html?id=' + selectedManga.id" class="btn-buy-manga" style="background: #3b82f6; margin-top: 8px;">
+                            <i class="fas fa-star"></i>
+                            <span>ดูรีวิว & ให้คะแนน</span>
                         </a>
-                    </template>
                     </div>
                 </template>
             </div>
         </div>
-
     </div>
-
 </body>
 </html>

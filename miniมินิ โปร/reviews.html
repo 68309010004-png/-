@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Reviews - MangaPick</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/reviews.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script src="js/reviews.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div class="review-container" x-data="reviewsApp()" x-cloak>
+        <!-- Header -->
+        <header class="review-header">
+            <a href="index.html" class="btn-back">
+                <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
+            </a>
+            <h1>รีวิวและคะแนน</h1>
+        </header>
+
+        <main class="review-content" x-show="!loading">
+            <!-- ข้อมูลมังงะและคะแนนเฉลี่ย -->
+            <section class="manga-summary-card" x-show="manga">
+                <div class="summary-cover">
+                    <img :src="manga?.cover" :alt="manga.title">
+                </div>
+                <div class="summary-detail">
+                    <h2 x-text="manga?.title"></h2>
+                    <p class="author" x-text="'ผู้แต่ง: ' + (manga?.author || 'ไม่ระบุ')"></p>
+                    
+                    <div class="avg-rating-box">
+                        <span class="rating-num" x-text="avgRating"></span>
+                        <div class="stars-display">
+                            <template x-for="i in 5">
+                                <i class="fa-star" :class="i <= Math.round(avgRating) ? 'fas active' : 'far'"></i>
+                            </template>
+                        </div>
+                        <span class="total-reviews" x-text="'(' + reviews.length + ' รีวิว)'"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ฟอร์มเขียนรีวิว -->
+            <section class="card-box write-review-box">
+                <h3><i class="fas fa-pen"></i> เขียนรีวิวของคุณ</h3>
+                
+                <form @submit.prevent="submitReview()">
+                    <div class="star-rating-input">
+                        <label>คะแนนของคุณ:</label>
+                        <div class="stars">
+                            <template x-for="star in 5">
+                                <i class="fa-star" 
+                                   :class="(hoverRating || form.rating) >= star ? 'fas active' : 'far'"
+                                   @mouseover="hoverRating = star"
+                                   @mouseleave="hoverRating = 0"
+                                   @click="form.rating = star"></i>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea x-model="form.comment" rows="3" placeholder="แบ่งปันความรู้สึกเกี่ยวกับมังงะเรื่องนี้..." class="form-control" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit-review" :disabled="submitting">
+                        <span x-text="submitting ? 'กำลังบันทึก...' : 'ส่งรีวิว'"></span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- รายการรีวิวจากผู้ใช้คนอื่น -->
+            <section class="card-box reviews-list-section">
+                <h3>ความคิดเห็นจากผู้อ่าน</h3>
+
+                <template x-if="reviews.length === 0">
+                    <div class="empty-reviews">
+                        <i class="far fa-comments"></i>
+                        <p>ยังไม่มีรีวิวสำหรับเรื่องนี้ เป็นคนแรกที่รีวิวเลย!</p>
+                    </div>
+                </template>
+
+                <div class="reviews-list">
+                    <template x-for="review in reviews" :key="review.id">
+                        <div class="review-item">
+                            <div class="review-header-item">
+                                <span class="reviewer-email" x-text="review.userEmail"></span>
+                                <div class="stars-display small">
+                                    <template x-for="i in 5">
+                                        <i class="fa-star" :class="i <= review.rating ? 'fas active' : 'far'"></i>
+                                    </template>
+                                </div>
+                            </div>
+                            <p class="review-comment" x-text="review.comment"></p>
+                            <div class="review-footer-item">
+                                <span class="review-date" x-text="formatDate(review.createdAt)"></span>
+                                <template x-if="currentUser && currentUser.uid === review.userId">
+                                    <button class="btn-delete-review" @click="deleteReview(review.id)">
+                                        <i class="fas fa-trash"></i> ลบ
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
